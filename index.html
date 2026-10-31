@@ -127,19 +127,36 @@
             margin-bottom: 15px;
         }
 
+        /* زر الخروج بتصميم أزرار شريط الأدوات مع أيقونة اليد */
         .close-output {
-            background: #ff4444;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            background: rgba(30, 30, 30, 0.9);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .close-output img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            filter: brightness(0) invert(1); /* لضبط لون الأيقونة لتتلاءم مع الوضع المظلم */
+        }
+
+        .close-output:hover {
+            background: rgba(50, 50, 50, 1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .close-output:active {
+            transform: scale(0.95);
         }
 
         iframe {
@@ -183,7 +200,7 @@
     <div class="output-modal" id="outputModal">
         <div class="output-header">
             <span id="outputTitle">معاينة النتيجة</span>
-            <button class="close-output" onclick="closeOutput()">✕</button>
+            <button class="close-output" onclick="closeOutput()"><img src="https://images.icon-icons.com/958/PNG/96/hand_icon-icons.com_74459.png" alt="إغلاق"></button>
         </div>
         <iframe id="previewFrame"></iframe>
     </div>
@@ -378,5 +395,4 @@
         }
     </script>
 </body>
-    </html>
-                                                                                                            
+</html>
