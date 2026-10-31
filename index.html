@@ -23,23 +23,22 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 0; /* إزالة المسافات المحيطة بالشاشة ليصبح الشريط ملتصقاً بالأعلى */
+            padding: 12px;
             overflow: hidden;
         }
 
-        /* شريط الأدوات العلوي المطابق للصورة (ملتصق وبدون حواف دائرية سفلية) */
+        /* شريط الأدوات العلوي المطابق للصورة */
         .toolbar {
             display: flex;
             gap: 6px;
-            background: rgba(18, 18, 18, 0.95);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 10px 12px;
-            border-radius: 0;
+            background: rgba(18, 18, 18, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px;
+            border-radius: 14px;
             overflow-x: auto;
             backdrop-filter: blur(12px);
-            margin-bottom: 0; /* إزالة المسافة الفاصلة */
+            margin-bottom: 12px;
             scrollbar-width: none; /* إخفاء الشريط في متصفحات فايرفوكس */
-            z-index: 10;
         }
 
         .toolbar::-webkit-scrollbar {
@@ -72,14 +71,14 @@
             transform: scale(0.95);
         }
 
-        /* منطقة كتابة الكود (ملتصقة بالشريط العلوي وبدون حواف علوية) */
+        /* منطقة كتابة الكود */
         .editor-container {
             flex: 1;
             display: flex;
             position: relative;
             background: rgba(10, 10, 10, 0.95);
-            border: none;
-            border-radius: 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
             overflow: hidden;
             backdrop-filter: blur(10px);
         }
@@ -128,30 +127,19 @@
             margin-bottom: 15px;
         }
 
-        /* تعديل زر الخروج ليطابق أزرار شريط الأدوات تماماً مع تأثيرات التمرير */
         .close-output {
-            background: rgba(30, 30, 30, 0.9);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             cursor: pointer;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .close-output:hover {
-            background: rgba(50, 50, 50, 1);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .close-output:active {
-            transform: scale(0.95);
+            font-size: 16px;
         }
 
         iframe {
@@ -173,7 +161,7 @@
         <option value="java">Java</option>
     </select>
 
-    <!-- شريط الألواح والأدوات (يحتوي الآن على زر الإعدادات كأحد الأزرار) -->
+    <!-- شريط الألواح والأدوات -->
     <div class="toolbar">
         <button class="tool-btn" onclick="runCode()" title="تشغيل / معاينة"><i class="fa-solid fa-play"></i></button>
         <button class="tool-btn" onclick="undoCode()" title="تراجع"><i class="fa-solid fa-rotate-left"></i></button>
@@ -191,12 +179,11 @@
         <textarea id="codeArea" placeholder="اكتب الكود هنا..."></textarea>
     </div>
 
-    <!-- نافذة المعاينة (تظهر عند تشغيل كود HTML) -->
+    <!-- نافذة المعاينة -->
     <div class="output-modal" id="outputModal">
         <div class="output-header">
             <span id="outputTitle">معاينة النتيجة</span>
-            <!-- تم استبدال التصميم القديم بزر يطابق أزرار شريط الأدوات مع أيقونة إغلاق -->
-            <button class="close-output" onclick="closeOutput()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+            <button class="close-output" onclick="closeOutput()">✕</button>
         </div>
         <iframe id="previewFrame"></iframe>
     </div>
@@ -206,7 +193,6 @@
         const langSelect = document.getElementById('languageSelect');
         const RAPIDAPI_KEY = "fa11d9018d62133f96db03a1a222e689";
 
-        // مكدس خاص لإدارة التراجع والإعادة بدقة داخل الـ Textarea
         let undoStack = [];
         let redoStack = [];
         let isInternalChange = false;
@@ -214,7 +200,16 @@
         codeArea.addEventListener('input', () => {
             if (isInternalChange) return;
             undoStack.push(codeArea.value);
-            redoStack = []; // تفريغ مكدس الإعادة عند كتابة نص جديد
+            redoStack = [];
+        });
+
+        // رصد عملية اللصق سواء عبر زر اللصق أو عبر اختصار الكيبورد (Ctrl + V)
+        codeArea.addEventListener('paste', (e) => {
+            setTimeout(() => {
+                codeArea.selectionStart = 0;
+                codeArea.selectionEnd = 0;
+                codeArea.scrollTop = 0; // تحريك شريط التمرير لأعلى الكود أيضاً
+            }, 10);
         });
 
         function undoCode() {
@@ -237,19 +232,17 @@
             }
         }
 
-        // دالة زر الإعدادات
         function openSettings() {
             alert('لوحة الإعدادات قيد التطوير.');
         }
 
-        // نسخ الكود
         function copyCode() {
             codeArea.select();
             navigator.clipboard.writeText(codeArea.value);
             alert('تم نسخ الكود بنجاح!');
         }
 
-        // لصق الكود (تم إصلاحها بالطريقة الحديثة للتعامل مع الحافظة)
+        // دالة اللصق عبر زر شريط الأدوات مع نقل المؤشر إلى البداية
         async function pasteCode() {
             try {
                 if (navigator.clipboard && navigator.clipboard.readText) {
@@ -257,8 +250,13 @@
                     const startPos = codeArea.selectionStart;
                     const endPos = codeArea.selectionEnd;
                     codeArea.value = codeArea.value.substring(0, startPos) + text + codeArea.value.substring(endPos);
-                    codeArea.selectionStart = codeArea.selectionEnd = startPos + text.length;
+                    
+                    // تحريك المؤشر إلى بداية الكود مباشرة
+                    codeArea.selectionStart = 0;
+                    codeArea.selectionEnd = 0;
+                    codeArea.scrollTop = 0;
                     codeArea.focus();
+                    
                     undoStack.push(codeArea.value);
                 } else {
                     alert('خاصية اللصق غير مدعومة مباشرة في متصفحك، يرجى استخدام الاختصار (Ctrl + V).');
@@ -268,7 +266,6 @@
             }
         }
 
-        // مسح المحتوى
         function clearEditor() {
             if (confirm('هل أنت متأكد من مسح جميع المحتوى؟')) {
                 undoStack.push(codeArea.value);
@@ -277,7 +274,6 @@
             }
         }
 
-        // تحميل الملف بالصيغة الصحيحة بناءً على اللغة المحددة
         function downloadCode() {
             const code = codeArea.value;
             const lang = langSelect.value;
@@ -298,7 +294,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // تشغيل الكود ومعاينته (مع دعم تشغيل بايثون عبر API)
         async function runCode() {
             const code = codeArea.value;
             const lang = langSelect.value;
@@ -322,7 +317,6 @@
                 iframeDoc.close();
 
                 try {
-                    // إرسال طلب إلى Judge0 عبر RapidAPI
                     const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true", {
                         method: "POST",
                         headers: {
@@ -332,7 +326,7 @@
                         },
                         body: JSON.stringify({
                             source_code: code,
-                            language_id: 71 // معرف لغة Python في Judge0
+                            language_id: 71
                         })
                     });
 
@@ -371,12 +365,10 @@
             document.getElementById('outputModal').style.display = 'none';
         }
 
-        // تنسيق مبسط للكود (إزالة المسافات الزائدة وتنظيم الأسطر)
         function formatCode() {
             try {
                 let code = codeArea.value;
                 undoStack.push(code);
-                // تنسيق أساسي عبر ترتيب الأسطر وإزالة الفراغات الزائدة
                 code = code.split('\n').map(line => line.trim()).join('\n');
                 codeArea.value = code;
                 alert('تم تنسيق الكود بنجاح!');
@@ -386,5 +378,5 @@
         }
     </script>
 </body>
-                </html>
-                
+    </html>
+                                                                                                            
