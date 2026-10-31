@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> CODE PRO </title>
+    <title>محرر الأكواد الاحترافي</title>
     <!-- استيراد خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- مكتبة الأيقونات FontAwesome -->
@@ -127,8 +127,15 @@
             margin-bottom: 15px;
         }
 
-        /* زر الخروج بتصميم أزرار شريط الأدوات مع أيقونة اليد */
-        .close-output {
+        /* حاوية الأزرار بجانب العنوان في نافذة المعاينة */
+        .output-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* زر الخروج وزر المشاركة بتصميم أزرار شريط الأدوات */
+        .close-output, .share-output {
             background: rgba(30, 30, 30, 0.9);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -140,22 +147,16 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            font-size: 14px;
         }
 
-        .close-output img {
-            width: 16px;
-            height: 16px;
-            object-fit: contain;
-            filter: brightness(0) invert(1); /* لضبط لون الأيقونة لتتلاءم مع الوضع المظلم */
-        }
-
-        .close-output:hover {
+        .close-output:hover, .share-output:hover {
             background: rgba(50, 50, 50, 1);
             border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
         }
 
-        .close-output:active {
+        .close-output:active, .share-output:active {
             transform: scale(0.95);
         }
 
@@ -183,7 +184,7 @@
         <button class="tool-btn" onclick="runCode()" title="تشغيل / معاينة"><i class="fa-solid fa-play"></i></button>
         <button class="tool-btn" onclick="undoCode()" title="تراجع"><i class="fa-solid fa-rotate-left"></i></button>
         <button class="tool-btn" onclick="redoCode()" title="إعادة"><i class="fa-solid fa-rotate-right"></i></button>
-        <button class="tool-btn" onclick="formatCode()" title="تنسيق الكود"><i class="fa-solid fa-globe"></i></button>
+        <button class="tool-btn" onclick="findInCode()" title="بحث عن كلمة"><i class="fa-solid fa-magnifying-glass"></i></button>
         <button class="tool-btn" onclick="downloadCode()" title="تحميل الملف"><i class="fa-solid fa-download"></i></button>
         <button class="tool-btn" onclick="clearEditor()" title="حذف الكل"><i class="fa-solid fa-trash-can"></i></button>
         <button class="tool-btn" onclick="pasteCode()" title="لصق"><i class="fa-solid fa-clipboard"></i></button>
@@ -200,7 +201,10 @@
     <div class="output-modal" id="outputModal">
         <div class="output-header">
             <span id="outputTitle">معاينة النتيجة</span>
-            <button class="close-output" onclick="closeOutput()"><img src="https://images.icon-icons.com/958/PNG/96/hand_icon-icons.com_74459.png" alt="إغلاق"></button>
+            <div class="output-actions">
+                <button class="share-output" onclick="shareCode()" title="مشاركة الكود"><i class="fa-solid fa-share-nodes"></i></button>
+                <button class="close-output" onclick="closeOutput()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+            </div>
         </div>
         <iframe id="previewFrame"></iframe>
     </div>
@@ -257,6 +261,28 @@
             codeArea.select();
             navigator.clipboard.writeText(codeArea.value);
             alert('تم نسخ الكود بنجاح!');
+        }
+
+        // دالة مشاركة الكود
+        async function shareCode() {
+            const code = codeArea.value;
+            if (!code.trim()) {
+                alert('لا يوجد كود للمشاركة.');
+                return;
+            }
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'محرر الأكواد الاحترافي',
+                        text: code
+                    });
+                } catch (err) {
+                    console.log('تم إلغاء المشاركة');
+                }
+            } else {
+                navigator.clipboard.writeText(code);
+                alert('خاصية المشاركة غير مدعومة مباشرة، تم نسخ الكود إلى الحافظة بدلاً من ذلك!');
+            }
         }
 
         // دالة اللصق عبر زر شريط الأدوات مع نقل المؤشر إلى البداية
@@ -382,17 +408,21 @@
             document.getElementById('outputModal').style.display = 'none';
         }
 
-        function formatCode() {
-            try {
-                let code = codeArea.value;
-                undoStack.push(code);
-                code = code.split('\n').map(line => line.trim()).join('\n');
-                codeArea.value = code;
-                alert('تم تنسيق الكود بنجاح!');
-            } catch (e) {
-                alert('تعذر تنسيق الكود.');
+        // دالة البحث عن كلمة داخل الكود
+        function findInCode() {
+            const query = prompt('أدخل الكلمة المراد البحث عنها:');
+            if (!query) return;
+            const text = codeArea.value;
+            const index = text.indexOf(query);
+            if (index !== -1) {
+                codeArea.focus();
+                codeArea.setSelectionRange(index, index + query.length);
+                alert(`تم العثور على الكلمة "${query}" بنجاح!`);
+            } else {
+                alert(`لم يتم العثور على الكلمة "${query}" في الكود.`);
             }
         }
     </script>
 </body>
-</html>
+    </html>
+    
